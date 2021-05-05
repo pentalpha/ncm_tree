@@ -52,6 +52,7 @@ valid_ncms = set(tree_df['ncm'].tolist())
 tree_df['pai'] = tree_df.apply(
     lambda row: define_parent(row['ncm'], valid_ncms),
     axis=1)
+tree_df.to_csv('ncms.tsv',sep='\t')
 
 #save in graph format
 graph = nx.from_pandas_edgelist(tree_df, "ncm", "pai")
