@@ -1,6 +1,5 @@
 import pandas as pd
 import networkx as nx
-from tqdm import tqdm
 from networkx.readwrite import json_graph
 import json
 
@@ -35,27 +34,10 @@ def define_parent(ncm, valid_codes):
                   "not found. Trying next relative.")
             candidate_parts = candidate_parts[:-1]
         return ".".join(candidate_parts)
-    
-#expand names to eliminate codes with odd length
-ncm_df['nome'] = ncm_df.apply(
-    lambda row: expand_name(row['ncm'], row['nome'], df_copy),
-    axis=1)
-ncm_df['odd_code'] = ncm_df.apply(
-    lambda row: (len(row['ncm'].split('.')[-1]) % 2) != 0,
-    axis=1)
-ncm_df = ncm_df[ncm_df['odd_code'] == False]
-del ncm_df['odd_code']
 
-#find parent for each NCM
-tree_df = ncm_df.copy()
-valid_ncms = set(tree_df['ncm'].tolist())
-tree_df['pai'] = tree_df.apply(
-    lambda row: define_parent(row['ncm'], valid_ncms),
-    axis=1)
-tree_df.to_csv('ncms.tsv',sep='\t')
-
+print("Creating graph file")
 #save in graph format
-graph = nx.from_pandas_edgelist(tree_df, "ncm", "pai")
+graph = nx.from_pandas_edgelist(ncm_df, "ncm", "pai")
 data = json_graph.adjacency_data(graph)
 s = json.dumps(data)
 open("ncm_tree.json", 'w').write(s)
